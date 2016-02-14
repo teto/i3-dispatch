@@ -139,9 +139,11 @@ def send_nvim_wincmd(path_to_socket, direction):
                 # https://github.com/neovim/python-client/issues/124
                 nvim = attach('socket', path=path_to_socket)
                 log.debug("nvim attached")
-                res= nvim.call('WinCmdWithRes', direction)
-                log.debug("RPC call %d" % res)
-                res = nvim.vars['wincmd_result']
+                # res= nvim.call('WinCmdWithRes', direction)
+                nvim.execute('let oldwin = winnr() | wincmd p')
+                res = nvim.eval('oldwin != winnr()')
+                # log.debug("RPC call %d" % res)
+                # res = nvim.vars['wincmd_result']
                 log.debug("Result of command %d" % res)
                 return res
         except Exception as e:
