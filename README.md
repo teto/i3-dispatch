@@ -8,7 +8,9 @@ For instance, if you are focusing a vim terminal with 2 splits, your WM bindings
 
 Pull requests welcome at https://github.com/teto/i3-dispatch
 
-Works in pair with the vim plugin https://github.com/teto/nvim-wm
+
+#Supported applications
+For now only neovim.
 
 
 #How to use ?
@@ -22,9 +24,11 @@ bindsym $mod+k exec 3dispatch up
 bindsym $mod+l exec 3dispatch right
 
 # alternatively, you can use the cursor keys:
-bindsym $mod+Left  exec i3dispatch left
-bindsym $mod+Down  exec i3dispatch down
-bindsym $mod+Up    exec i3dispatch up
-bindsym $mod+Right exec i3dispatch right
+bindsym $mod+Left  exec /usr/bin/3dispatch left
+bindsym $mod+Down  exec /usr/bin/i3dispatch down
+bindsym $mod+Up    exec /usr/bin/i3dispatch up
+bindsym $mod+Right exec /usr/bin/i3dispatch right
 
 ```
+#How to debug
+Logs by default in $HOME/i3dispatcher.log

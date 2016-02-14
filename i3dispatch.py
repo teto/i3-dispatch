@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 # log.setLevel(logging.INFO)
 log.setLevel(logging.DEBUG)
 
-log.addHandler(logging.FileHandler(os.path.join(os.getenv("HOME","") , "i3nvim.log"), delay=False))
+log.addHandler(logging.FileHandler(os.path.join(os.getenv("HOME","") , "i3dispatch.log"), delay=False))
 
 """
 Exit value:
@@ -80,8 +80,8 @@ def get_dispatcher():
 # if we are focusing neovim
         if name.endswith("NVIM"):
                 return nvim_dispatcher
-        elif name.startswith("matt@"):
-                return weechat_dispatcher
+        # elif name.startswith("matt@"):
+                # return weechat_dispatcher
         elif name.endswith("Thunderbird"):
                 return thunderbird_dispatcher
         
@@ -139,16 +139,14 @@ def send_nvim_wincmd(path_to_socket, direction):
                 # https://github.com/neovim/python-client/issues/124
                 nvim = attach('socket', path=path_to_socket)
                 log.debug("nvim attached")
-                # res= nvim.call('WinCmdWithRes', direction)
-                nvim.execute('let oldwin = winnr() | wincmd p')
+                nvim.command('let oldwin = winnr()') 
+                nvim.command('wincmd ' + direction)
                 res = nvim.eval('oldwin != winnr()')
-                # log.debug("RPC call %d" % res)
-                # res = nvim.vars['wincmd_result']
                 log.debug("Result of command %d" % res)
                 return res
         except Exception as e:
                 log.error("Exception %s" % e)
-                exit(1)
+                return False
 
         return False
 
