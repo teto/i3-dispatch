@@ -82,8 +82,8 @@ def get_dispatcher():
                 return nvim_dispatcher
         # elif name.startswith("matt@"):
                 # return weechat_dispatcher
-        elif name.endswith("Thunderbird"):
-                return thunderbird_dispatcher
+        # elif name.endswith("Thunderbird"):
+        #         return thunderbird_dispatcher
         
         return i3_dispatcher
 
