@@ -23,19 +23,6 @@ setup(name="i3dispatch",
           'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
       ],
       keywords=["i3 neovim"],
-      packages=[
-          "mptcpanalyzer", "mptcpanalyzer/plots",
-      ],
-      # data files allows to install files outside the package
-      # see package_data to add files within pkg
-      # package_data=['
-      package_data={
-          # '': ['*.md', "*.json"],
-          # "mptcpanalyzer": ["toto/mptcp_fields.json"],
-          },
-      # data_files=[
-          # ("data", "mptcpanalyzer/mptcp_fields.json"),
-      # ],
       entry_points={
           "console_scripts": [
             # creates 2 system programs that can be called from PATH
