@@ -20,10 +20,10 @@ Exit value:
 1 => failure
 """
 directions = {
-        'left' : 'h',
-        'right' : "l",
-        'up': 'k',
-        'down': 'j',
+    'left' : 'h',
+    'right' : "l",
+    'up': 'k',
+    'down': 'j',
 }
 
 
