@@ -102,7 +102,7 @@ def get_dispatcher():
 # if we are focusing neovim
     if name.endswith("NVIM"):
         return nvim_dispatcher
-    elif name.startswith("qutebrowser"):
+    elif name.endswith("qutebrowser"):
         return qutebrowser_dispatcher
     # elif name.startswith("matt@"):
         # return weechat_dispatcher
