@@ -1,5 +1,5 @@
 with import <nixpkgs> {};
 
-i3-dispatch.overrideAttrs (oa: {
+i3dispatch.overrideAttrs (oa: {
   src = ./.;
 })
