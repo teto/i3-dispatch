@@ -6,6 +6,7 @@ import os
 import traceback
 import logging
 import psutil
+import socket
 
 '''
 To test with qutebrowser
@@ -52,14 +53,39 @@ def qutebrowser_dispatcher(direction):
     """
     direction should depend on the setting
     tabs.position
+    https://github.com/qutebrowser/qutebrowser/blob/master/scripts/open_url_in_instance.sh
     """
-    if direction == 'down':
-        key = ":tab-next"
-    elif direction == 'up':
-        key = ":tab-prev"
-    else:
-        return False
+    # if direction == 'down':
+    #     key = ":tab-next"
+    # elif direction == 'up':
+    #     key = ":tab-prev"
+    # else:
+    #     return False
+    # cmd = ["qutebrowser", key ]
+    # log.debug("Launching command %s" % cmd)
+    # subprocess.check_call(cmd)
 
+    #!/bin/bash
+    # initial idea: Florian Bruhin (The-Compiler)
+    # author: Thore Bödecker (foxxx0)
+
+    _url="$1"
+    _qb_version='1.0.4'
+    _proto_version=1
+    _ipc_socket="${XDG_RUNTIME_DIR}/qutebrowser/ipc-$(echo -n "$USER" | md5sum | cut -d' ' -f1)"
+    _qute_bin="/usr/bin/qutebrowser"
+
+    req = {"args": [":tab-next"],
+    "target_arg": null,
+    "version": "1",
+    "protocol_version": "1", 
+    "cwd": "/home/teto", # why do we care ?
+    }
+        # "${PWD}" | socat - UNIX-CONNECT:"${_ipc_socket}" 2>/dev/null || "$_qute_bin" "$@" &
+
+    with open(_ipc_socket) as fd:
+        sock = socket.socket(fd=fd)
+        sock.write()
     cmd = ["qutebrowser", key ]
     log.debug("Launching command %s" % cmd)
     subprocess.check_call(cmd)
