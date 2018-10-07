@@ -32,8 +32,6 @@ directions = {
         'down': 'j',
         }
 
-
-
 def thunderbird_dispatcher(direction):
     if direction == 'right':
         key = "Ctrl+Tab"
@@ -72,23 +70,40 @@ def qutebrowser_dispatcher(direction):
     _url="$1"
     _qb_version='1.0.4'
     _proto_version=1
-    _ipc_socket="${XDG_RUNTIME_DIR}/qutebrowser/ipc-$(echo -n "$USER" | md5sum | cut -d' ' -f1)"
-    _qute_bin="/usr/bin/qutebrowser"
+    # $USER" | md5sum | cut -d' ' -f1
+    user=os.getenv("USER")
+    import hashlib
+    import json
+    m = hashlib.md5()
+    m.update(user.encode())
 
-    req = {"args": [":tab-next"],
-    "target_arg": null,
-    "version": "1",
-    "protocol_version": "1", 
-    "cwd": "/home/teto", # why do we care ?
+    _ipc_socket="{runtime_dir}/qutebrowser/ipc-{digest}".format(
+        runtime_dir=os.getenv("XDG_RUNTIME_DIR"),
+        digest=m.hexdigest()
+    )
+
+    req = {
+        "args": [":tab-next"],
+        "target_arg": "null",
+        "version": "1",
+        "protocol_version": "1", 
+        "cwd": "/home/teto", # why do we care ?
     }
         # "${PWD}" | socat - UNIX-CONNECT:"${_ipc_socket}" 2>/dev/null || "$_qute_bin" "$@" &
 
-    with open(_ipc_socket) as fd:
-        sock = socket.socket(fd=fd)
-        sock.write()
-    cmd = ["qutebrowser", key ]
-    log.debug("Launching command %s" % cmd)
-    subprocess.check_call(cmd)
+    # with open(_ipc_socket) as fd:
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.connect(_ipc_socket)
+    js = json.dumps(req)
+    print("sedning js")
+    print(js)
+    sock.sendall(js.encode())
+    data = sock.recv(1024)
+    sock.close()
+    print("received %r", data)
+    # cmd = ["qutebrowser", key ]
+    # log.debug("Launching command %s" % cmd)
+    # subprocess.check_call(cmd)
     return True
 
 
@@ -108,8 +123,7 @@ def weechat_dispatcher(direction):
     return True
 
 
-def nvim_dispatcher(direction):
-    log.info("NVIM detected")
+def neovim_dispatcher(direction):
     res, socket = get_nvim_socket()
 
     if not res:
@@ -122,12 +136,11 @@ def nvim_dispatcher(direction):
         log.debug("nvim did not change focus")
     return False
 
-def get_dispatcher():
-    name = get_focused_window_name()
+def get_dispatcher(name):
     log.debug("Window name=%s" % name)
 # if we are focusing neovim
     if name.endswith("NVIM"):
-        return nvim_dispatcher
+        return neovim_dispatcher
     elif name.endswith("qutebrowser"):
         return qutebrowser_dispatcher
     # elif name.startswith("matt@"):
@@ -138,7 +151,8 @@ def get_dispatcher():
 
 def get_focused_window_name():
     try:
-        out = subprocess.check_output("xdotool getwindowfocus getwindowname", shell=True).decode('utf-8').rstrip()
+        # might be possible to get X via an X library or psutils ?
+        out = subprocess.check_output(["xdotool", "getwindowfocus", "getwindowname"], shell=False).decode('utf-8').rstrip()
         return out
     except Exception as e:
         log.error(e)
@@ -205,6 +219,13 @@ def i3_dispatcher(direction):
     subprocess.check_call(cmd)
     return True
 
+dispatchers = {
+    "neovim": neovim_dispatcher,
+    "qutebrowser": qutebrowser_dispatcher,
+    "i3": i3_dispatcher,
+}
+
+
 
 def main():
     """
@@ -213,18 +234,28 @@ def main():
     # TODO we can set NVIM_LISTEN_ADDRESS before hand
     parser = argparse.ArgumentParser(description="parameter to send to wincmd")
     parser.add_argument("direction", choices=directions.keys())
-    parser.add_argument("--test", action="store_const", const=True)
+    parser.add_argument("--test", action="store", choices=dispatchers.keys(), )
+    parser.add_argument("--test-title", action="store", type=str, default=None)
 
     args = parser.parse_args()
 
     """
     get dispatcher function
     """
-    dispatcher = get_dispatcher()
+
+
+    # if anything failed or nvim didn't change buffer focus, we forward the command o i3
+
+    if args.test:
+        dispatcher = dispatchers.get(args.test)
+    else:
+        window_title = args.test_title or get_focused_window_name()
+        dispatcher = get_dispatcher(window_title)
 
     log.info("Calling dispatcher %r with direction %s" % (dispatcher, args.direction))
-    # dispatcher("toto")
-    # if anything failed or nvim didn't change buffer focus, we forward the command o i3
+
+
     if not dispatcher(args.direction):
         i3_dispatcher(args.direction)
+
     exit(0)
