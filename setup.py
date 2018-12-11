@@ -32,7 +32,7 @@ setup(name="i3dispatch",
       },
       # pandas should include matplotlib dependancy right ?
       install_requires=[
-        'neovim',
+        'pynvim',
         'psutil',
       ],
       zip_safe=True,
